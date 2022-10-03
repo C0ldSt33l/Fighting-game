@@ -1,81 +1,130 @@
 #pragma once
 
+#include"window.h"
 #include"texture.h"
 #include"animation.h"
+#include"box.h"
+#include"battle.h"
+
+//     TASKS:
+// * add block
 
 
-#define PLAYER_SPEED	WINDOW_WIDTH / 3 / FRAME_COUNT
+// PLAYER CONFIG
+#define PLAYER_SPEED WINDOW_WIDTH / 3 / WINDOW_FRAME_COUNT
 
 #define PLAYER_ANGEL		  90
 #define PLAYER_ANGEL_CHANGING 45
 
+#define INTERSECTION_MAX_WIDTH 100
 
-enum PlaerMoveStatus {
-	PLAYER_NONE	   = -1,
-	PLAYER_NEUTRAL,
+#define PLAYER_COUNT 4
 
-	PLAYER_WALKING,
-	PLAYER_JUMPING,
-	PLAYER_CROUCHING,
-	
-	PLAYER_BLOCKING,
-	PLAYER_ATTACKING
+#define CHARACTER_ANIMATION_PATH "files/assets/sprites/characters/"
+#define CHARACTER_DATA_PATH      "files/data/"
+
+enum PlayerStatus {
+    PLAYER_NONE = -1,
+    PLAYER_NEUTRAL,
+
+    PLAYER_WALKING,
+    PLAYER_JUMPING,
+    PLAYER_CROUCHING,
+
+    PLAYER_ATTACKING,
+    PLAYER_BLOCKING,
+    //PLAYER_TAKING_DAMAGE
 };
 
+enum PlayerSide {
+    SIDE_NONE  =  0,
+    SIDE_RIGHT = -1,
+    SIDE_LEFT  =  1
+};
 
-struct Animation;
+enum AttackDirection {
+    ATTACK_LOW  = 1,
+    ATTACK_MID,
+    ATTACK_HIGH,
+};
 
-struct Key {
-	bool up		 = false,
-		 down	 = false,
-		 forward = false,
-		 back	 = false,
-		 
-		 hitA = false,
-		 hitB = false,
-		 hitC = false;
+extern const char character[PLAYER_COUNT][12];
+
+
+// STRUCTS
+struct BattleKey;
+struct Action;
+
+struct PlayerKey {
+    bool up      = false,
+         down    = false,
+         forward = false,
+         back    = false;
+
+    bool hitA  = false,
+         hitB  = false,
+         hitC  = false,
+         block = false;
 };
 
 struct Status {
-	int attack = PLAYER_NONE,
-		move   = PLAYER_NONE;
+    int move   = PLAYER_NONE,
+        attack = PLAYER_NONE;
 };
 
 struct Player {
-	
-	Animation* animation = NULL;
-	int curframe = -1;
-	int curanimation = -1;
 
-	SDL_Rect	   dstrect = { 0, 0, 0, 0 };
-	SDL_Point	   speed = { 0, 0 };
-	int			   direction = 0;
-	
-	Key			   key;
-	Status		   status;
-	
-	int			   health	 = -1,
-				   metre	 = -1;
+    Action* action;
+    
+    int  curframe     = -1;
+    int  curanimation = -1;
+    bool isPlaying    = false;
 
-	int time = -1;
+    SDL_Rect dstrect;
+    Box box;
+    
+    SDL_Point speed;
+    
+    int	angel  = 0;
+
+    int side = SIDE_NONE;
+
+    PlayerKey key;
+    Status status;
+
+    int maxHealth = -1,
+        health    = -1;
+
+    int  damage    = -1;
+    bool canAttack = false;
+
+    int time = 0;
 };
 
 
-void drawHitBox(const SDL_Rect& hitbox);
+// FUNCTIONS
+void setPlayerRect(SDL_Rect& dstrect, const SDL_Rect& srcrect, int side);
+void initPlayer(Player& player, const char* name, int side);
+void deInitPlayer(Player& player);
 
-void changeDirection(Key& key, int* direction, SDL_Rect& dstrect, int move);
+void updatePlayerKeystatus(PlayerKey& playerKey, int side, const BattleKey& battleKey);
+void updatePlayerStatus(PlayerKey& key, Status& status, SDL_Rect& dstrect, int& angel, int curframe, int framecount, bool& canAttack);
+void updatePlayerHP(Player& player1, Player& player2);
+void updatePlayerAnimation(Player& player);
 
-void updateKeyStatus(Key& key, SDL_Event& event);
-void updatePlayerStatus(Key& key, Status& status, SDL_Rect& dstrect, int curframe, int framecount);
-void updatePlayer(Player& player);
+void decreasePlayerHP(int& health, int damage);
 
-bool isInBoard(const SDL_Rect* dstrect);
+void updatePlayer(Player& player, BattleKey& key);
+void updatePlayers(Player& player1, Player& player2, BattleKey& key);
+
+bool isInBoard(const SDL_Rect& dstrect);
 void returnInBoard(SDL_Rect& dstrect);
 
-void walk(SDL_Rect& dstrect, Key& key, int move, int speedx);
-void jump(SDL_Rect& dstrect, int direction, int move, SDL_Point& speed);
+void walk(SDL_Rect& dstrect, PlayerKey& key, int move, int speedx, int side);
 
-void changeHP(Player& player1, Player& player2);
+void setJump(PlayerKey& key, int& angel, const SDL_Rect& dstrect);
+void jump(SDL_Rect& dstrect, int& angel, int move, int speedx, int speedy, PlayerKey& key, int side);
 
-void initPlayer(Player& player);
-void deInitPlayer(Player& player);
+void movePlayers(Player& player1, Player& player2);
+
+void drawPlayer(const Player& player, int i);

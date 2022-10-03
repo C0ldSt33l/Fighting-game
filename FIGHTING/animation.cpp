@@ -1,116 +1,161 @@
+#include<stdio.h>
+
 #include"animation.h"
 #include"texture.h"
+#include"player.h"
 
 
-// naoto's framedata
-int NAOTO_FRAME_COUNT[ANIMATION_COUNT] = {
-	9,
-	10, 8, //9, 
-	8, 9, 10,
-	5, 10, 12,
-	14, 15, 18
-	//9, 9, 9
+const char ANIMATION_TYPE[ANIMATION_COUNT][16] = {
+    "neutral",
+
+    "walk",
+    //"walk forward",
+    //"walk back",
+    "crouch",
+
+    //"stand block",
+    //"crouch block",
+    //"jump block",
+
+    "normal a",
+    "normal b",
+    "normal c",
+
+    "crouch normal a",
+    "crouch normal b",
+    "crouch normal c",
+
+    "jump normal a",
+    "jump normal b",
+    "jump normal c",
+
+    "special a",
+    "special b",
+    "special c"
+
+    //"stand take damage",
+    //"crouch take damage",
+    //"jump take damage",
 };
 
-const char NAOTO_PATH[ANIMATION_COUNT][60] = {
-	"files/assets/sprites/characters/naoto/neutral.png",
 
-	"files/assets/sprites/characters/naoto/walk.png",
-	"files/assets/sprites/characters/naoto/crouch.png",
+Animation createAnimation(const char* file, FILE* dataFile) {
+    
+    Animation animation;
 
-	"files/assets/sprites/characters/naoto/normal a.png",
-	"files/assets/sprites/characters/naoto/normal b.png",
-	"files/assets/sprites/characters/naoto/normal c.png",
+    fscanf_s(dataFile, "%d", &animation.framecount);
+    fscanf_s(dataFile, "%d", &animation.speed);
 
-	"files/assets/sprites/characters/naoto/crouch normal a.png",
-	"files/assets/sprites/characters/naoto/crouch normal b.png",
-	"files/assets/sprites/characters/naoto/crouch normal c.png",
+    animation.texture = createTexture(file);
+    animation.texture.dstrect.w /= animation.framecount;
 
-	"files/assets/sprites/characters/naoto/special a.png",
-	"files/assets/sprites/characters/naoto/special b.png",
-	"files/assets/sprites/characters/naoto/special c.png"
-};
-
-
-Animation createAnimation(const char* file, int framecount) {
-
-	Animation animation;
-
-	animation.texture = createTexture(file);
-	animation.texture.dstrect.w /= framecount;
-	
-	animation.framecount = framecount;
-
-	animation.speed = ANIMATION_TIME;
-
-	return animation;
+    return animation;
 }
 
-void initAnimation(Animation* array) {
+Action* initAction(const char* name, FILE* dataFile) {
 
-	for (int i = 0; i < ANIMATION_COUNT; i++) {
-		array[i] = createAnimation(NAOTO_PATH[i], NAOTO_FRAME_COUNT[i]);
-	}
+    Action* action = (Action*)malloc(sizeof(Action) * ANIMATION_COUNT);
+    if (!action) {
+        printf("Memory allocate error for player.action\n");
+        deInit(1);
+    }
+
+    char fullpath[100];
+
+    for (int i = 0; i < ANIMATION_COUNT; i++) {
+        sprintf_s(fullpath, 100, "%s%s/%s%s", CHARACTER_ANIMATION_PATH, name, ANIMATION_TYPE[i], ".png");
+        action[i].animation = createAnimation(fullpath, dataFile);
+        
+        SDL_Rect rect;
+        fscanf_s(dataFile, "%d%d%d%d", &rect.x, &rect.y, &rect.w, &rect.h);
+        action[i].box.hurtbox = rect;
+        fscanf_s(dataFile, "%d%d%d%d", &rect.x, &rect.y, &rect.w, &rect.h);
+        action[i].box.hitbox = rect;
+
+        fscanf_s(dataFile, "%d", &action[i].damage);
+    }
+
+    return action;
 }
 
-void changeAnimation(Status& status, Key& key, SDL_Rect& srcrect, int* curframe, int* curanimation) {
+void changeAnimation(Status& status, PlayerKey& key, SDL_Rect& srcrect, int& curFrame, int& curAnimation, bool& isPlaying) {
 
-	*curframe = 0;
-	srcrect.x = srcrect.y = 0;
+    curFrame = 0;
+    srcrect.x = srcrect.y = 0;
+    isPlaying = true;
 
-	if (status.attack == PLAYER_ATTACKING) {
-		switch (status.move) {
-		case PLAYER_NEUTRAL:
-			if		(key.hitA) *curanimation = ANIMATION_ATTACK_A;
-			else if (key.hitB) *curanimation = ANIMATION_ATTACK_B;
-			else			   *curanimation = ANIMATION_ATTACK_C;
-			break;
+    if (status.attack) {
+        switch (status.attack) {
+        case PLAYER_ATTACKING:
+            switch (status.move) {
+            case PLAYER_NEUTRAL:
+                if      (key.hitA) curAnimation = ANIMATION_ATTACK_A;
+                else if (key.hitB) curAnimation = ANIMATION_ATTACK_B;
+                else			   curAnimation = ANIMATION_ATTACK_C;
+                break;
 
-		case PLAYER_WALKING:
-			if (key.forward) {
-				if		(key.hitA) *curanimation = ANIMATION_SPECIAL_ATTACK_A;
-				else if (key.hitB) *curanimation = ANIMATION_SPECIAL_ATTACK_B;
-				else			   *curanimation = ANIMATION_SPECIAL_ATTACK_C;
-			}
-			break;
+            case PLAYER_WALKING:
+                if (key.forward) {
+                    if      (key.hitA) curAnimation = ANIMATION_SPECIAL_ATTACK_A;
+                    else if (key.hitB) curAnimation = ANIMATION_SPECIAL_ATTACK_B;
+                    else			   curAnimation = ANIMATION_SPECIAL_ATTACK_C;
+                }
+                break;
 
-		case PLAYER_CROUCHING:
-			if		(key.hitA) *curanimation = ANIMATION_CROUCH_ATTACK_A;
-			else if (key.hitB) *curanimation = ANIMATION_CROUCH_ATTACK_B;
-			else			   *curanimation = ANIMATION_CROUCH_ATTACK_C;
-			break;
+            case PLAYER_CROUCHING:
+                if      (key.hitA) curAnimation = ANIMATION_CROUCH_ATTACK_A;
+                else if (key.hitB) curAnimation = ANIMATION_CROUCH_ATTACK_B;
+                else			   curAnimation = ANIMATION_CROUCH_ATTACK_C;
+                break;
 
-		/*case PLAYER_JUMPING:
-			if		(key.hitA) return ANIMATION_ATTACK_A;
-			else if (key.hitB) return ANIMATION_ATTACK_B;
-			else			   return ANIMATION_ATTACK_C;
-			break;*/
+            case PLAYER_JUMPING:
+                if      (key.hitA) curAnimation = ANIMATION_JUMP_ATTACK_A;
+                else if (key.hitB) curAnimation = ANIMATION_JUMP_ATTACK_B;
+                else			   curAnimation = ANIMATION_JUMP_ATTACK_C;
+                break;
+            }
+            break;
 
-		default:
-			break;
-		}
-	}
-	else {
-		switch (status.move) {
-		case PLAYER_NEUTRAL:   *curanimation = ANIMATION_NEUTRAL;
-			break;
-		case PLAYER_WALKING:   *curanimation = ANIMATION_WALK;
-			break;
-		case PLAYER_CROUCHING: *curanimation = ANIMATION_CROUCH;
-			break;
-		//case PLAYER_JUMPING:
-		//	break;
-		}
-	}
+
+        /*case PLAYER_BLOCKING:
+            switch (status.move) {
+            case PLAYER_NEUTRAL:   curanimation = ANIMATION_STAND_BLOCK;
+                break;
+            case PLAYER_CROUCHING: curanimation = ANIMATION_CROUCH_BLOCK;
+                break;
+            case PLAYER_JUMPING:   curanimation = ANIMATION_JUMP_BLOCK;
+                break;
+            }*/
+        }
+    }
+    else {
+        switch (status.move) {
+        case PLAYER_JUMPING:   //curanimation = ANIMATION_JUMP;
+        case PLAYER_NEUTRAL:   curAnimation = ANIMATION_NEUTRAL;
+            break;
+        case PLAYER_WALKING:   curAnimation = ANIMATION_WALK;
+            //curanimation = key.forward ? ANIMATION_WALK_FORWARD : ANIMATION_WALK_BACK;
+            break;
+        case PLAYER_CROUCHING: curAnimation = ANIMATION_CROUCH;
+            break;
+        }
+    }
 }
 
-void changeAnimationFrame(int* curframe, int* time, SDL_Rect& srcrect, int speed, int framecount) {
+void changeAnimationFrame(bool& isPlaying, int& curframe, int& time, int move, Animation& animation) {
 
-	int newtime = SDL_GetTicks();
-	if (newtime - *time >= speed) {
-		
-		*curframe = (*curframe + 1) % framecount;
-		srcrect.x = *curframe * srcrect.w;
-		*time = newtime;
-	}
+    //if (!isPlaying) return;
+    
+    static int newtime;
+    newtime = SDL_GetTicks();
+
+    if (newtime - time >= animation.speed) {
+        curframe = (curframe + 1) % animation.framecount;
+        animation.texture.dstrect.x = curframe * animation.texture.dstrect.w;
+        time = newtime;
+    }
+
+    /*if (move == PLAYER_JUMPING && curframe == animation.framecount - 1) {
+        isPlaying = false;
+    }*/
 }

@@ -2,12 +2,16 @@
 
 #include"window.h"
 
-struct Texture {
-	SDL_Texture* text = NULL;
 
-	SDL_Rect dstrect = { 0, 0, 0, 0 };
+// STRUCTS
+struct Texture {
+    SDL_Texture* text = NULL;
+
+    SDL_Rect dstrect = { 0, 0, 0, 0 };
 };
 
+
+// FUNCTIONS
 SDL_Surface* loadImage(const char* file);
 Texture createTexture(const char* file);
 

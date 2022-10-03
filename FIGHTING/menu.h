@@ -2,6 +2,7 @@
 
 #include"window.h"
 #include"texture.h"
+#include"game.h"
 
 // BUTTON CONFIG
 
@@ -17,31 +18,37 @@ extern SDL_Color ACTIVE_BUTTON_COLOR;
 
 // MENU CONFIG
 
-#define MENU_MUSIC "files\\assets\\sounds\\BBCF main menu.mp3"
+#define MENU_MUSIC "files/assets/sounds/music/BBCF main menu.mp3"
 
-#define MENU_FONT  "files\\assets\\fonts\\RED.ttf"
+#define MENU_FONT  "files/assets/fonts/RED.ttf"
 #define MENU_MAX_FONT_SIZE  100
 #define MENU_MIN_FONT_SIZE  35
 
-const char MENU_OPTIONS[MENU_BUTTON_COUNT][9] = {"start", "settings", "about", "exit"};
+extern const char MENU_OPTIONS[MENU_BUTTON_COUNT][9];
 
 enum MenuStatus {
-	MENU_NONE = -1,
-	MENU_START,
-	MENU_SETTINGS,
-	MENU_ABOUT,
-	MENU_EXIT
+    MENU_NONE = -1,
+    MENU_START,
+    MENU_SETTINGS,
+    MENU_ABOUT,
+    MENU_EXIT
 };
 
+
+// STRUCTS
 struct Menu {
-	unsigned int status = MENU_NONE;
-	Texture button[MENU_BUTTON_COUNT];
+    
+    bool run = false;
+    SDL_Event event;
+    
+    int status = MENU_NONE;
+    Texture button[MENU_BUTTON_COUNT];
 
-	Mix_Music* music = NULL;
-	TTF_Font* font = NULL;
+    Mix_Music* music = NULL;
+    TTF_Font* font = NULL;
 
-	const Uint8* keyState = NULL;
-	int ticks;
+    const Uint8* keyState = NULL;
+    int ticks;
 };
 
 // FUNCTIONS
@@ -56,9 +63,11 @@ void drawButtons(const Texture* array);
 void changeActiveButton(Menu& menu);
 
 // 2. Menu
-void menuInit(Menu& menu);
-void menuDeInit(Menu& menu);
+void initMenu(Menu& menu);
+void deInitMenu(Menu& menu);
 
-void updateMenu(Menu& menu);
+void updateMenu(Menu& menu, Game& game);
 
 void drawMenu(const Menu& menu);
+
+void menu(Game& game);
