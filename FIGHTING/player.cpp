@@ -41,9 +41,11 @@ void initPlayer(Player& player, const char* name, int side) {
     int i = ANIMATION_NEUTRAL;
     player.curanimation = i;
     player.isPlaying = true;
+
     
     setPlayerRect(player.dstrect, player.action[i].animation.texture.dstrect, side);
     setPlayerBoxes(player.box, side, player.action[i].box, player.dstrect);
+
 
     player.damage    = 0;
     player.canAttack = true;
@@ -57,6 +59,7 @@ void initPlayer(Player& player, const char* name, int side) {
     player.side = side;
 
     player.time = SDL_GetTicks();
+
 }
 
 void deInitPlayer(Player& player) {
@@ -108,6 +111,8 @@ void updatePlayerKeystatus(PlayerKey& playerKey, int side, const BattleKey& batt
         playerKey.hitB  = battleKey.i;
         playerKey.hitC  = battleKey.o;
         playerKey.block = battleKey.q;
+
+        playerKey.taunt = battleKey.e;
     }
     else {
         playerKey.up      = battleKey.up;
@@ -119,6 +124,8 @@ void updatePlayerKeystatus(PlayerKey& playerKey, int side, const BattleKey& batt
         playerKey.hitB  = battleKey.n5;
         playerKey.hitC  = battleKey.n6;
         playerKey.block = battleKey.n2;
+
+        playerKey.taunt = battleKey.n8;
     }
 }
 
@@ -127,10 +134,13 @@ void updatePlayerStatus(PlayerKey& key, Status& status, SDL_Rect& dstrect, int& 
     bool isAttacking = key.hitA || key.hitB || key.hitC;
     
     switch (status.attack) {
-    case PLAYER_NEUTRAL:
-        if		(isAttacking)			    { status.attack = PLAYER_ATTACKING; }
+    case PLAYER_NEUTRAL: {
+        bool canTaunt = status.move == PLAYER_CROUCHING || status.move == PLAYER_NEUTRAL;
+        if (isAttacking) { status.attack = PLAYER_ATTACKING; }
         else if (key.block && !isAttacking) { status.attack = PLAYER_BLOCKING; }
+        else if (key.taunt && canTaunt) { status.attack = PLAYER_TAUNTING; }
         break;
+    }
 
     case PLAYER_ATTACKING:
         if (curframe == framecount - 1 || dstrect.y + dstrect.h > BOARD.h) { 
@@ -142,9 +152,13 @@ void updatePlayerStatus(PlayerKey& key, Status& status, SDL_Rect& dstrect, int& 
     case PLAYER_BLOCKING:
         if (!key.block) status.attack = PLAYER_NEUTRAL;
         break;
+
+    case PLAYER_TAUNTING:
+       if (curframe == framecount - 1) { status.attack = PLAYER_NEUTRAL; }
+       break;
     }
 
-    if (status.attack != PLAYER_ATTACKING) {
+    if (status.attack != PLAYER_ATTACKING && status.attack != PLAYER_TAUNTING) {
         
         bool isWalking = key.forward && !key.back || !key.forward && key.back;
         switch (status.move) {
@@ -234,7 +248,6 @@ void updatePlayerHP(Player& player1, Player& player2) {
     if (SDL_HasIntersection(&player1.box.hurtbox, &player2.box.hitbox) && player2.canAttack) {
         float multiply = player1.status.attack == PLAYER_BLOCKING ? 0.5 : 1;
         decreasePlayerHP(player1.health, player2.damage * multiply);
-        printf("P1 HP: %d\n", player1.health);
         player2.canAttack = false;
     }
 }

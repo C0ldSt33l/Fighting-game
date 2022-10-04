@@ -83,6 +83,9 @@ void updateBattleKey(bool& run, SDL_Event& event, BattleKey& key, Game& game) {
             case SDL_SCANCODE_Q: key.q = true;
                 break;
 
+            case SDL_SCANCODE_E: key.e = true;
+                break;
+
 
             case SDL_SCANCODE_UP:	 key.up    = true;
                 break;
@@ -100,6 +103,9 @@ void updateBattleKey(bool& run, SDL_Event& event, BattleKey& key, Game& game) {
             case SDL_SCANCODE_KP_6: key.n6 = true;
                 break;
             case SDL_SCANCODE_KP_2: key.n2 = true;
+                break;
+
+            case SDL_SCANCODE_KP_8: key.n8 = true;
                 break;
             }
             break;
@@ -124,6 +130,9 @@ void updateBattleKey(bool& run, SDL_Event& event, BattleKey& key, Game& game) {
             case SDL_SCANCODE_Q: key.q = false;
                 break;
 
+            case SDL_SCANCODE_E: key.e = false;
+                break;
+
 
             case SDL_SCANCODE_UP:	 key.up    = false;
                 break;
@@ -141,6 +150,9 @@ void updateBattleKey(bool& run, SDL_Event& event, BattleKey& key, Game& game) {
             case SDL_SCANCODE_KP_6: key.n6 = false;
                 break;
             case SDL_SCANCODE_KP_2: key.n2 = false;
+                break;
+
+            case SDL_SCANCODE_KP_8: key.n8 = false;
                 break;
             }
             break;

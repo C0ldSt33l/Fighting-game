@@ -7,6 +7,8 @@
 #include"interface.h"
 #include"game.h"
 
+
+// STRUCTS
 struct Player;
 
 struct BattleKey {
@@ -18,17 +20,21 @@ struct BattleKey {
          u = false,
          i = false,
          o = false,
-         q = false;
+         q = false,
+         
+         e = false;
 
-    bool up    = false,
-         down  = false,
-         left  = false,
+    bool up = false,
+         down = false,
+         left = false,
          right = false,
-
+         
          n4 = false,
          n5 = false,
          n6 = false,
-         n2 = false;
+         n2 = false,
+         
+         n8 = false;
 };
 
 struct Battle {
@@ -49,6 +55,7 @@ struct Battle {
 };
 
 
+// FUNCTIONS
 void initBattle(Battle& battle);
 void deInitBattle(Battle& battle);
 

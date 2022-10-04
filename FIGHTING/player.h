@@ -22,16 +22,19 @@
 
 enum PlayerStatus {
     PLAYER_NONE = -1,
+    
     PLAYER_NEUTRAL,
-
-    PLAYER_WALKING_FORWARD,
-    PLAYER_WALKING_BACK,
     PLAYER_JUMPING,
     PLAYER_CROUCHING,
 
+    PLAYER_WALKING_FORWARD,
+    PLAYER_WALKING_BACK,
+
     PLAYER_ATTACKING,
     PLAYER_BLOCKING,
+    PLAYER_TAUNTING,
     //PLAYER_TAKING_DAMAGE
+
 };
 
 enum PlayerSide {
@@ -63,6 +66,8 @@ struct PlayerKey {
          hitB  = false,
          hitC  = false,
          block = false;
+
+    bool taunt = false;
 };
 
 struct Status {

@@ -8,7 +8,6 @@
 const char ANIMATION_TYPE[ANIMATION_COUNT][16] = {
     "neutral",
 
-    //"walk",
     "walk forward",
     "walk back",
     "crouch",
@@ -32,7 +31,9 @@ const char ANIMATION_TYPE[ANIMATION_COUNT][16] = {
 
     "special a",
     "special b",
-    "special c"
+    "special c",
+
+    "taunt",
 
     //"stand take damage",
     //"crouch take damage",
@@ -115,6 +116,8 @@ void changeAnimation(Status& status, PlayerKey& key, SDL_Rect& srcrect, int& cur
             }
             break;
 
+        case PLAYER_TAUNTING: curAnimation = ANIMATION_TAUNT;
+            break;
 
         //case PLAYER_BLOCKING:
         //    switch (status.move) {
