@@ -6,9 +6,6 @@
 #include"box.h"
 #include"battle.h"
 
-//     TASKS:
-// * add block
-
 
 // PLAYER CONFIG
 #define PLAYER_SPEED WINDOW_WIDTH / 3 / WINDOW_FRAME_COUNT
@@ -85,7 +82,7 @@ struct Player {
     
     SDL_Point speed;
     
-    int	angel  = 0;
+    int	angle  = 0;
 
     int side = SIDE_NONE;
 
@@ -108,23 +105,23 @@ void initPlayer(Player& player, const char* name, int side);
 void deInitPlayer(Player& player);
 
 void updatePlayerKeystatus(PlayerKey& playerKey, int side, const BattleKey& battleKey);
-void updatePlayerStatus(PlayerKey& key, Status& status, SDL_Rect& dstrect, int& angel, int curframe, int framecount, bool& canAttack);
+void updatePlayerStatus(PlayerKey& key, Status& status, SDL_Rect& dstrect, int& angle, int curframe, int framecount, bool& canAttack);
 void updatePlayerHP(Player& player1, Player& player2);
-void updatePlayerAnimation(Player& player);
+void updatePlayerAnimation(Player& player, int& move, int& attack);
+void updatePlayer(Player& player, BattleKey& key);
 
 void decreasePlayerHP(int& health, int damage);
 
-void updatePlayer(Player& player, BattleKey& key);
+void walk(SDL_Rect& dstrect, PlayerKey& key, const Status& status, int speedx, int side);
+
+void setJump(PlayerKey& key, int& angle, const SDL_Rect& dstrect);
+void jump(SDL_Rect& dstrect, int& angle, int move, int speedx, int speedy, PlayerKey& key, int side);
+
 void updatePlayers(Player& player1, Player& player2, BattleKey& key);
+
+void movePlayers(Player& player1, Player& player2);
 
 bool isInBoard(const SDL_Rect& dstrect);
 void returnInBoard(SDL_Rect& dstrect);
-
-void walk(SDL_Rect& dstrect, PlayerKey& key, int move, int speedx, int side);
-
-void setJump(PlayerKey& key, int& angel, const SDL_Rect& dstrect);
-void jump(SDL_Rect& dstrect, int& angel, int move, int speedx, int speedy, PlayerKey& key, int side);
-
-void movePlayers(Player& player1, Player& player2);
 
 void drawPlayer(const Player& player, int i);

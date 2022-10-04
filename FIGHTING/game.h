@@ -10,9 +10,9 @@ enum GameStatus {
 };
 
 struct Game {
-    int status = GAME_MENU;
-
     bool run = true;
+
+    int status = GAME_MENU;
 };
 
 void processGame(Game& game);

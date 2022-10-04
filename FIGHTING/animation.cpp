@@ -8,10 +8,11 @@
 const char ANIMATION_TYPE[ANIMATION_COUNT][16] = {
     "neutral",
 
-    "walk",
-    //"walk forward",
-    //"walk back",
+    //"walk",
+    "walk forward",
+    "walk back",
     "crouch",
+    //"jump",
 
     //"stand block",
     //"crouch block",
@@ -117,15 +118,16 @@ void changeAnimation(Status& status, PlayerKey& key, SDL_Rect& srcrect, int& cur
             break;
 
 
-        /*case PLAYER_BLOCKING:
-            switch (status.move) {
-            case PLAYER_NEUTRAL:   curanimation = ANIMATION_STAND_BLOCK;
-                break;
-            case PLAYER_CROUCHING: curanimation = ANIMATION_CROUCH_BLOCK;
-                break;
-            case PLAYER_JUMPING:   curanimation = ANIMATION_JUMP_BLOCK;
-                break;
-            }*/
+        //case PLAYER_BLOCKING:
+        //    switch (status.move) {
+        //    case PLAYER_NEUTRAL:   //curanimation = ANIMATION_STAND_BLOCK;
+        //        break;
+        //    case PLAYER_CROUCHING: //curanimation = ANIMATION_CROUCH_BLOCK;
+        //        break;
+        //    case PLAYER_JUMPING:   //curanimation = ANIMATION_JUMP_BLOCK;
+        //        break;
+        //    }
+        //    break;
         }
     }
     else {
@@ -133,8 +135,8 @@ void changeAnimation(Status& status, PlayerKey& key, SDL_Rect& srcrect, int& cur
         case PLAYER_JUMPING:   //curanimation = ANIMATION_JUMP;
         case PLAYER_NEUTRAL:   curAnimation = ANIMATION_NEUTRAL;
             break;
-        case PLAYER_WALKING:   curAnimation = ANIMATION_WALK;
-            //curanimation = key.forward ? ANIMATION_WALK_FORWARD : ANIMATION_WALK_BACK;
+        case PLAYER_WALKING:   //curAnimation = ANIMATION_WALK;
+            curAnimation = key.forward ? ANIMATION_WALK_FORWARD : ANIMATION_WALK_BACK;
             break;
         case PLAYER_CROUCHING: curAnimation = ANIMATION_CROUCH;
             break;

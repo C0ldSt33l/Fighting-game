@@ -53,7 +53,7 @@ void initPlayer(Player& player, const char* name, int side) {
     player.speed.x = PLAYER_SPEED;
     player.speed.y = 1.5f * PLAYER_SPEED;
     
-    player.angel = -90;
+    player.angle = -90;
     player.side = side;
 
     player.time = SDL_GetTicks();
@@ -75,7 +75,7 @@ void deInitPlayer(Player& player) {
     player.status.attack = player.status.move = PLAYER_NONE;
 
     player.speed = { 0, 0 };
-    player.angel = -90;
+    player.angle = -90;
     player.side = SIDE_NONE;
 
     player.health = player.maxHealth = -1;
@@ -83,16 +83,16 @@ void deInitPlayer(Player& player) {
     player.time = -1;
 }
 
-void setJump(PlayerKey& key, int& angel, const SDL_Rect& dstrect) {
+void setJump(PlayerKey& key, int& angle, const SDL_Rect& dstrect) {
     
     if (dstrect.y == BOARD.h - dstrect.h) {
-        angel = 90;
-        if      (key.forward && !key.back)  angel -= PLAYER_ANGEL_CHANGING;
-        else if (!key.forward && key.back)  angel += PLAYER_ANGEL_CHANGING;
+        angle = 90;
+        if      (key.forward && !key.back)  angle -= PLAYER_ANGEL_CHANGING;
+        else if (!key.forward && key.back)  angle += PLAYER_ANGEL_CHANGING;
     }
 
     if (dstrect.y <= WINDOW_HEIGHT / 3) {
-        angel = -angel;
+        angle = -angle;
     }
 }
 
@@ -122,7 +122,7 @@ void updatePlayerKeystatus(PlayerKey& playerKey, int side, const BattleKey& batt
     }
 }
 
-void updatePlayerStatus(PlayerKey& key, Status& status, SDL_Rect& dstrect, int& angel ,int curframe, int framecount, bool& canAttack) {
+void updatePlayerStatus(PlayerKey& key, Status& status, SDL_Rect& dstrect, int& angle ,int curframe, int framecount, bool& canAttack) {
 
     bool isAttacking = key.hitA || key.hitB || key.hitC;
     
@@ -149,15 +149,15 @@ void updatePlayerStatus(PlayerKey& key, Status& status, SDL_Rect& dstrect, int& 
         bool isWalking = key.forward && !key.back || !key.forward && key.back;
         switch (status.move) {
         case PLAYER_NEUTRAL:
-            if		(key.up && !key.down) { status.move = PLAYER_JUMPING; }
-            else if (!key.up && key.down) { status.move = PLAYER_CROUCHING; }
-            else if (isWalking)			  { status.move = PLAYER_WALKING; }
+            if		(key.up && !key.down)     { status.move = PLAYER_JUMPING; }
+            else if (!key.up && key.down)     { status.move = PLAYER_CROUCHING; }
+            else if (!key.block && isWalking) { status.move = PLAYER_WALKING; }
             break;
 
         case PLAYER_WALKING:
-            if		(key.up && !key.down) { status.move = PLAYER_JUMPING; }
-            else if (!key.up && key.down) { status.move = PLAYER_CROUCHING; }
-            else if	(!isWalking)		  { status.move = PLAYER_NEUTRAL; }
+            if		(key.up && !key.down)     { status.move = PLAYER_JUMPING; }
+            else if (!key.up && key.down)     { status.move = PLAYER_CROUCHING; }
+            else if	(!isWalking || key.block) { status.move = PLAYER_NEUTRAL; }
             break;
 
         case PLAYER_JUMPING:
@@ -184,9 +184,9 @@ void returnInBoard(SDL_Rect& dstrect) {
 
 }
 
-void walk(SDL_Rect& dstrect, PlayerKey& key, int move, int speedx, int side) {
+void walk(SDL_Rect& dstrect, PlayerKey& key, const Status& status, int speedx, int side) {
 
-    if (move != PLAYER_WALKING) return;
+    if (status.move != PLAYER_WALKING || status.attack == PLAYER_BLOCKING) return;
 
     static int offset;
     offset = speedx * side;
@@ -197,15 +197,15 @@ void walk(SDL_Rect& dstrect, PlayerKey& key, int move, int speedx, int side) {
     returnInBoard(dstrect);
 }
 
-void jump(SDL_Rect& dstrect, int& angel, int move, int speedx, int speedy, PlayerKey& key, int side) {
+void jump(SDL_Rect& dstrect, int& angle, int move, int speedx, int speedy, PlayerKey& key, int side) {
 
     if (move != PLAYER_JUMPING) return;
 
-    setJump(key, angel, dstrect);
+    setJump(key, angle, dstrect);
 
     static float offsetx, offsety;
-    offsetx = speedx * cos(angel * M_PI / 180) * side;
-    offsety = speedy * sin(angel * M_PI / 180);
+    offsetx = speedx * cos(angle * M_PI / 180) * side;
+    offsety = speedy * sin(angle * M_PI / 180);
 
     dstrect.y -= offsety;
     dstrect.x += offsetx;
@@ -214,8 +214,9 @@ void jump(SDL_Rect& dstrect, int& angel, int move, int speedx, int speedy, Playe
 }
 
 void decreasePlayerHP(int& health, int damage) {
+    if (!health) return;
 
-    health -= damage;
+    health = health - damage > 0 ? health - damage : 0;
 }
 
 void updatePlayerHP(Player& player1, Player& player2) {
@@ -234,7 +235,7 @@ void updatePlayerAnimation(Player& player) {
     move = player.status.move;
     attack = player.status.attack;
 
-    updatePlayerStatus(player.key, player.status, player.dstrect, player.angel, player.curframe, player.action[player.curanimation].animation.framecount, player.canAttack);
+    updatePlayerStatus(player.key, player.status, player.dstrect, player.angle, player.curframe, player.action[player.curanimation].animation.framecount, player.canAttack);
     if (move != player.status.move || attack != player.status.attack) {
         changeAnimation(player.status, player.key, player.action[player.curanimation].animation.texture.dstrect, player.curframe, player.curanimation, player.isPlaying);
 
@@ -279,11 +280,11 @@ void movePlayers(Player& player1, Player& player2) {
             speedX2 = 0;
     }
 
-    walk(player1.dstrect, player1.key, player1.status.move, speedX1, player1.side);
-    walk(player2.dstrect, player2.key, player2.status.move, speedX2, player2.side);
+    walk(player1.dstrect, player1.key, player1.status, speedX1, player1.side);
+    walk(player2.dstrect, player2.key, player2.status, speedX2, player2.side);
 
-    jump(player1.dstrect, player1.angel, player1.status.move, speedX1, player1.speed.y, player1.key, player1.side);
-    jump(player2.dstrect, player2.angel, player2.status.move, speedX2, player2.speed.y, player2.key, player2.side);
+    jump(player1.dstrect, player1.angle, player1.status.move, speedX1, player1.speed.y, player1.key, player1.side);
+    jump(player2.dstrect, player2.angle, player2.status.move, speedX2, player2.speed.y, player2.key, player2.side);
 }
 
 void updatePlayers(Player& player1, Player& player2, BattleKey& key) {
