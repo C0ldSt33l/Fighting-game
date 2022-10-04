@@ -149,15 +149,24 @@ void updatePlayerStatus(PlayerKey& key, Status& status, SDL_Rect& dstrect, int& 
         bool isWalking = key.forward && !key.back || !key.forward && key.back;
         switch (status.move) {
         case PLAYER_NEUTRAL:
-            if		(key.up && !key.down)     { status.move = PLAYER_JUMPING; }
-            else if (!key.up && key.down)     { status.move = PLAYER_CROUCHING; }
-            else if (!key.block && isWalking) { status.move = PLAYER_WALKING; }
+            if		(key.up && !key.down)                    { status.move = PLAYER_JUMPING; }
+            else if (!key.up && key.down)                    { status.move = PLAYER_CROUCHING; }
+            else if (!key.block && isWalking && key.forward) { status.move = PLAYER_WALKING_FORWARD; }
+            else if (!key.block && isWalking && key.back)    { status.move = PLAYER_WALKING_BACK; }
             break;
 
-        case PLAYER_WALKING:
-            if		(key.up && !key.down)     { status.move = PLAYER_JUMPING; }
+        case PLAYER_WALKING_FORWARD:
+            if      (key.up && !key.down)     { status.move = PLAYER_JUMPING; }
             else if (!key.up && key.down)     { status.move = PLAYER_CROUCHING; }
-            else if	(!isWalking || key.block) { status.move = PLAYER_NEUTRAL; }
+            else if (!isWalking || key.block) { status.move = PLAYER_NEUTRAL; }
+            else if (isWalking && key.back)   { status.move = PLAYER_WALKING_BACK; }
+            break;
+
+        case PLAYER_WALKING_BACK:
+            if      (key.up && !key.down)      { status.move = PLAYER_JUMPING; }
+            else if (!key.up && key.down)      { status.move = PLAYER_CROUCHING; }
+            else if (!isWalking || key.block)  { status.move = PLAYER_NEUTRAL; }
+            else if (isWalking && key.forward) { status.move = PLAYER_WALKING_FORWARD; }
             break;
 
         case PLAYER_JUMPING:
@@ -186,7 +195,8 @@ void returnInBoard(SDL_Rect& dstrect) {
 
 void walk(SDL_Rect& dstrect, PlayerKey& key, const Status& status, int speedx, int side) {
 
-    if (status.move != PLAYER_WALKING || status.attack == PLAYER_BLOCKING) return;
+    if (status.move != PLAYER_WALKING_FORWARD && status.move != PLAYER_WALKING_BACK ||
+        status.attack == PLAYER_BLOCKING) return;
 
     static int offset;
     offset = speedx * side;

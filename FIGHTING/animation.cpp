@@ -95,12 +95,10 @@ void changeAnimation(Status& status, PlayerKey& key, SDL_Rect& srcrect, int& cur
                 else			   curAnimation = ANIMATION_ATTACK_C;
                 break;
 
-            case PLAYER_WALKING:
-                if (key.forward) {
-                    if      (key.hitA) curAnimation = ANIMATION_SPECIAL_ATTACK_A;
-                    else if (key.hitB) curAnimation = ANIMATION_SPECIAL_ATTACK_B;
-                    else			   curAnimation = ANIMATION_SPECIAL_ATTACK_C;
-                }
+            case PLAYER_WALKING_FORWARD:
+                if      (key.hitA) curAnimation = ANIMATION_SPECIAL_ATTACK_A;
+                else if (key.hitB) curAnimation = ANIMATION_SPECIAL_ATTACK_B;
+                else			   curAnimation = ANIMATION_SPECIAL_ATTACK_C;
                 break;
 
             case PLAYER_CROUCHING:
@@ -132,13 +130,14 @@ void changeAnimation(Status& status, PlayerKey& key, SDL_Rect& srcrect, int& cur
     }
     else {
         switch (status.move) {
-        case PLAYER_JUMPING:   //curanimation = ANIMATION_JUMP;
-        case PLAYER_NEUTRAL:   curAnimation = ANIMATION_NEUTRAL;
+        case PLAYER_JUMPING:         //curanimation = ANIMATION_JUMP;
+        case PLAYER_NEUTRAL:         curAnimation = ANIMATION_NEUTRAL;
             break;
-        case PLAYER_WALKING:   //curAnimation = ANIMATION_WALK;
-            curAnimation = key.forward ? ANIMATION_WALK_FORWARD : ANIMATION_WALK_BACK;
+        case PLAYER_WALKING_FORWARD: curAnimation = ANIMATION_WALK_FORWARD;
             break;
-        case PLAYER_CROUCHING: curAnimation = ANIMATION_CROUCH;
+        case PLAYER_WALKING_BACK:    curAnimation = ANIMATION_WALK_BACK;
+            break;
+        case PLAYER_CROUCHING:       curAnimation = ANIMATION_CROUCH;
             break;
         }
     }
