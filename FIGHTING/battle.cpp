@@ -14,24 +14,13 @@ void initBattle(Battle& battle) {
     
     battle.run = true;
     
-    battle.arena = initArena(6);
+    battle.arena = initArena(2);
 
     battle.music = loadMusic("files/assets/sounds/music/GGXrd main menu.mp3");
 
-    battle.player1 = (Player*)malloc(sizeof(Player));
-    if (!battle.player1) {
-        printf("Memory allocate error for player1\n");
-        deInit(1);
-    }
-    battle.player2 = (Player*)malloc(sizeof(Player));
-    if (!battle.player2) {
-        printf("Memory allocate error for player2\n");
-        deInit(1);
-    }
+    battle.player1 = initPlayer("naoto", SIDE_LEFT);
+    battle.player2 = initPlayer("naoto", SIDE_RIGHT);
 
-
-    initPlayer(*battle.player1, "naoto", SIDE_LEFT);
-    initPlayer(*battle.player2, "naoto", SIDE_RIGHT);
     initInterface(battle.interface);
 }
 
@@ -43,10 +32,11 @@ void deInitBattle(Battle& battle) {
     Mix_FreeMusic(battle.music);
 
     deInitPlayer(*battle.player1);
-    free(battle.player1);
-
     deInitPlayer(*battle.player2);
+    free(battle.player1);
     free(battle.player2);
+    battle.player1 = nullptr;
+    battle.player2 = nullptr;
 
     deInitArena(battle.arena);
 
@@ -169,7 +159,8 @@ void updateBattle(Battle& battle, Game& game) {
                                       battle.player2->health, battle.player2->maxHealth);
 
     if (!battle.player1->health || !battle.player2->health) {
-        battle.run = game.run = false;
+        battle.run = false;
+        game.status = GAME_MENU;
     }
 }
 

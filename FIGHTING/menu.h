@@ -36,6 +36,13 @@ enum MenuStatus {
 
 
 // STRUCTS
+struct MenuKey {
+    bool up     = false,
+         down   = false;
+
+    bool accept = false;
+};
+
 struct Menu {
     
     bool run = false;
@@ -47,7 +54,8 @@ struct Menu {
     Mix_Music* music = NULL;
     TTF_Font* font = NULL;
 
-    const Uint8* keyState = NULL;
+    MenuKey key;
+
     int ticks;
 };
 
@@ -60,12 +68,15 @@ void setButtons(Texture* array, TTF_Font* font);
 void drawButton(const Texture& button);
 void drawButtons(const Texture* array);
 
+SDL_Texture* changeButtonTexture(SDL_Texture* texture, TTF_Font* font, int number, SDL_Color color);
 void changeActiveButton(Menu& menu);
 
 // 2. Menu
 void initMenu(Menu& menu);
 void deInitMenu(Menu& menu);
 
+void updateMeneKeyStatus(MenuKey& key);
+void updateMenuStatus(Menu& menu, Game& game);
 void updateMenu(Menu& menu, Game& game);
 
 void drawMenu(const Menu& menu);

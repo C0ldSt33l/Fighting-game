@@ -44,40 +44,47 @@ void drawButtons(const Texture* array) {
     }
 }
 
+SDL_Texture* changeButtonTexture(SDL_Texture* texture, TTF_Font* font, int number, SDL_Color color) {
+
+    SDL_DestroyTexture(texture);
+    
+    SDL_Surface* surface = loadText(font, MENU_OPTIONS[number], color);
+    texture = SDL_CreateTextureFromSurface(RENDER, surface);
+
+    SDL_FreeSurface(surface);
+
+    return texture;
+}
+
 void changeActiveButton(Menu& menu) {
 
-    if (!menu.keyState[SDL_SCANCODE_W] && !menu.keyState[SDL_SCANCODE_S]) return;
-    
+    if (!menu.key.up && !menu.key.down) return;
     static int curTime;
     curTime = SDL_GetTicks();
     
     if (curTime - menu.ticks < 200) return;
     menu.ticks = curTime;
     
-    static int offset, i = menu.status;
-    if (menu.keyState[SDL_SCANCODE_W]) offset = -1;
-    if (menu.keyState[SDL_SCANCODE_S]) offset = 1;
+    static int offset;
+    if (menu.key.up)   offset = -1;
+    if (menu.key.down) offset =  1;
 
-    SDL_DestroyTexture(menu.button[i].text);
-    SDL_Surface* surface = loadText(menu.font, MENU_OPTIONS[i], BUTTON_COLOR);
-    menu.button[i].text = SDL_CreateTextureFromSurface(RENDER, surface);
-    SDL_FreeSurface(surface);
+    menu.button[menu.status].text = changeButtonTexture(menu.button[menu.status].text, menu.font, menu.status, BUTTON_COLOR);
 
-    menu.status = i = i + offset < 0 ? MENU_BUTTON_COUNT - 1 : abs(i + offset) % MENU_BUTTON_COUNT;
-
-    SDL_DestroyTexture(menu.button[i].text);
-    surface = loadText(menu.font, MENU_OPTIONS[i], ACTIVE_BUTTON_COLOR);
-    menu.button[i].text = SDL_CreateTextureFromSurface(RENDER, surface);
-    SDL_FreeSurface(surface);
+    menu.status += offset;
+    menu.status = menu.status < 0 ? MENU_BUTTON_COUNT - 1 : menu.status;
+    
+    menu.button[menu.status].text = changeButtonTexture(menu.button[menu.status].text, menu.font, menu.status, ACTIVE_BUTTON_COLOR);
 }
 
 void initMenu(Menu& menu) {
     
     menu.run = true;
     menu.status = MENU_START;
+
     menu.music = loadMusic(MENU_MUSIC);
     menu.font = loadFont(MENU_FONT, getFontSize(WINDOW_WIDTH));
-    menu.keyState = SDL_GetKeyboardState(NULL);
+
     menu.ticks = SDL_GetTicks();
 
     setButtons(menu.button, menu.font);
@@ -98,19 +105,34 @@ void deInitMenu(Menu& menu) {
 
     menu.run = false;
     menu.status = MENU_NONE;
-    menu.music = NULL;
-    menu.font = NULL;
-    menu.keyState = NULL;
+   
+    menu.music = nullptr;
+    menu.font  = nullptr;
+    
+    menu.key = { false, false, false };
     menu.ticks = 0;
 }
 
-void updateMenu(Menu& menu, Game& game) {
+void updateMeneKeyStatus(MenuKey& key) {
 
-    changeActiveButton(menu);
-    if (menu.keyState[SDL_SCANCODE_RETURN] || menu.keyState[SDL_SCANCODE_J]) {
+    static const Uint8* state = SDL_GetKeyboardState(nullptr);
+
+    key.up   = state[SDL_SCANCODE_W] || state[SDL_SCANCODE_UP];
+    key.down = state[SDL_SCANCODE_S] || state[SDL_SCANCODE_DOWN];
+
+    key.accept = state[SDL_SCANCODE_U] || state[SDL_SCANCODE_KP_4] ||
+                 state[SDL_SCANCODE_RETURN] || state[SDL_SCANCODE_SPACE] ||
+                 state[SDL_SCANCODE_J];
+}
+
+void updateMenuStatus(Menu& menu, Game& game) {
+
+    if (menu.key.accept) {
         switch (menu.status) {
-        case MENU_START: menu.run = false;
-                         game.status = GAME_BATTLE;
+        case MENU_START:
+            menu.run = false;
+            game.status = GAME_BATTLE;
+
             break;
 
         case MENU_SETTINGS:
@@ -118,10 +140,17 @@ void updateMenu(Menu& menu, Game& game) {
         case MENU_ABOUT:
             break;
         case MENU_EXIT: menu.run = false;
-                        game.run = false;
+            game.run = false;
             break;
         }
     }
+}
+
+void updateMenu(Menu& menu, Game& game) {
+
+    updateMeneKeyStatus(menu.key);
+    updateMenuStatus(menu, game);
+    changeActiveButton(menu);
 }
 
 void drawMenu(const Menu& menu) {

@@ -107,7 +107,7 @@ struct Player {
 
 // FUNCTIONS
 void setPlayerRect(SDL_Rect& dstrect, const SDL_Rect& srcrect, int side);
-void initPlayer(Player& player, const char* name, int side);
+Player* initPlayer(const char* name, int side);
 void deInitPlayer(Player& player);
 
 void updatePlayerKeystatus(PlayerKey& playerKey, int side, const BattleKey& battleKey);

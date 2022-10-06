@@ -21,7 +21,13 @@ void setPlayerRect(SDL_Rect& dstrect, const SDL_Rect& srcrect, int side) {
     dstrect.y = BOARD.h - dstrect.h;
 }
 
-void initPlayer(Player& player, const char* name, int side) {
+Player* initPlayer(const char* name, int side) {
+
+    Player* player = (Player*)malloc(sizeof(Player));
+    if (!player) {
+        printf("Memory allocate error for player\n");
+        exit(1);
+    }
 
     char dataPath[100];
     sprintf_s(dataPath, 100, "%s%s%s", CHARACTER_DATA_PATH, name, ".txt");
@@ -31,35 +37,36 @@ void initPlayer(Player& player, const char* name, int side) {
         exit(1);
     }
 
-    fscanf_s(file, "%d", &player.maxHealth);
-    player.health = player.maxHealth;
+    fscanf_s(file, "%d", &player->maxHealth);
+    player->health = player->maxHealth;
 
-    player.action = initAction(name, file);
+    player->action = initAction(name, file);
     fclose(file);
     
-    player.curframe = 0;
+    player->curframe = 0;
     int i = ANIMATION_NEUTRAL;
-    player.curanimation = i;
-    player.isPlaying = true;
+    player->curanimation = i;
+    player->isPlaying = true;
 
     
-    setPlayerRect(player.dstrect, player.action[i].animation.texture.dstrect, side);
-    setPlayerBoxes(player.box, side, player.action[i].box, player.dstrect);
+    setPlayerRect(player->dstrect, player->action[i].animation.texture.dstrect, side);
+    setPlayerBoxes(player->box, side, player->action[i].box, player->dstrect);
 
 
-    player.damage    = 0;
-    player.canAttack = true;
+    player->damage    = 0;
+    player->canAttack = true;
 
-    player.status.attack = player.status.move = PLAYER_NEUTRAL;
+    player->status.attack = player->status.move = PLAYER_NEUTRAL;
 
-    player.speed.x = PLAYER_SPEED;
-    player.speed.y = 1.5f * PLAYER_SPEED;
+    player->speed.x = PLAYER_SPEED;
+    player->speed.y = 1.5f * PLAYER_SPEED;
     
-    player.angle = -90;
-    player.side = side;
+    player->angle = -90;
+    player->side = side;
 
-    player.time = SDL_GetTicks();
+    player->time = SDL_GetTicks();
 
+    return player;
 }
 
 void deInitPlayer(Player& player) {
@@ -72,6 +79,7 @@ void deInitPlayer(Player& player) {
     }
     free(player.action);
     player.action = nullptr;
+    player.isPlaying = false;
 
     player.dstrect = player.box.hitbox = player.box.hurtbox = { 0, 0, 0, 0 };
 
@@ -82,6 +90,9 @@ void deInitPlayer(Player& player) {
     player.side = SIDE_NONE;
 
     player.health = player.maxHealth = -1;
+
+    player.damage = 0;
+    player.canAttack = false;
 
     player.time = -1;
 }
