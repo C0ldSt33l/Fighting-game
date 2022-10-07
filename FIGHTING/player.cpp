@@ -43,15 +43,16 @@ Player* initPlayer(const char* name, int side) {
     player->action = initAction(name, file);
     fclose(file);
     
-    player->curframe = 0;
-    int i = ANIMATION_NEUTRAL;
+    int i = ANIMATION_JUMP_BLOCK;
     player->curanimation = i;
+    player->curframe = 0;
     player->isPlaying = true;
 
-    
     setPlayerRect(player->dstrect, player->action[i].animation.texture.dstrect, side);
+    //setBox(player->action[i].box.hurtbox, 0, 20, player->dstrect.w - 35, player->dstrect.h - 25);
     setPlayerBoxes(player->box, side, player->action[i].box, player->dstrect);
 
+    //printBox(player->action[i].box.hurtbox, "hurtbox");
 
     player->damage    = 0;
     player->canAttack = true;

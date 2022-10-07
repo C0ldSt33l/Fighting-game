@@ -13,9 +13,9 @@ const char ANIMATION_TYPE[ANIMATION_COUNT][16] = {
     "crouch",
     //"jump",
 
-    //"stand block",
-    //"crouch block",
-    //"jump block",
+    "stand block",
+    "crouch block",
+    "jump block",
 
     "normal a",
     "normal b",
@@ -119,16 +119,16 @@ void changeAnimation(Status& status, PlayerKey& key, SDL_Rect& srcrect, int& cur
         case PLAYER_TAUNTING: curAnimation = ANIMATION_TAUNT;
             break;
 
-        //case PLAYER_BLOCKING:
-        //    switch (status.move) {
-        //    case PLAYER_NEUTRAL:   //curanimation = ANIMATION_STAND_BLOCK;
-        //        break;
-        //    case PLAYER_CROUCHING: //curanimation = ANIMATION_CROUCH_BLOCK;
-        //        break;
-        //    case PLAYER_JUMPING:   //curanimation = ANIMATION_JUMP_BLOCK;
-        //        break;
-        //    }
-        //    break;
+        case PLAYER_BLOCKING:
+            switch (status.move) {
+            case PLAYER_NEUTRAL:   curAnimation = ANIMATION_STAND_BLOCK;
+                break;
+            case PLAYER_CROUCHING: curAnimation = ANIMATION_CROUCH_BLOCK;
+                break;
+            case PLAYER_JUMPING:   curAnimation = ANIMATION_JUMP_BLOCK;
+                break;
+            }
+            break;
         }
     }
     else {
