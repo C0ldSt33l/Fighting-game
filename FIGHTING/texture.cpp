@@ -13,6 +13,16 @@ SDL_Surface* loadImage(const char* file) {
     return surface;
 }
 
+SDL_Texture* createSdlTexture(const char* file) {
+
+    SDL_Surface* surface = loadImage(file);
+
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(RENDER, surface);
+    SDL_FreeSurface(surface);
+
+    return texture;
+}
+
 Texture createTexture(const char* file) {
     
     SDL_Surface* surface = loadImage(file);
@@ -29,7 +39,7 @@ Texture createTexture(const char* file) {
 
 SDL_Surface* loadText(TTF_Font* font, const char* text, const SDL_Color& color) {
 
-    SDL_Surface* surface = TTF_RenderText_Solid(font, text, color);
+    SDL_Surface* surface = TTF_RenderUTF8_Blended_Wrapped(font, text, color, WINDOW_WIDTH / 2);
     if (!surface) {
         printf("Couldn't create text: %s. Error: %s\n", text, SDL_GetError());
         deInit(1);

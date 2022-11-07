@@ -8,20 +8,16 @@
 
 // SELECTOR CONFIG
 #define ICON_PATH       "files/assets/sprites/icons/"
-#define ARENA_PATH      "files/assets/sprites/backgrounds/arenas/"
 #define SPLASH_ART_PATH "files/assets/sprites/splash arts/"
 
 #define ICON_DISTANCE WINDOW_WIDTH / 10
 
 #define SELECTOR_FONT_SIZE 12
 
-const char arenaName[4][10] = {
-
-};
-
 enum SelectStatus {
     SELECT_NONE = -1,
-    SELECT_CHARACTER,
+    SELECT_CHARACTER_1,
+    SELECT_CHARACTER_2,
     SELECT_ARENA,
     SELECT_MUSIC
 };
@@ -49,33 +45,33 @@ struct Selector {
 
     int player1select = -1,
         player2select = -1;
-    Icon* icon = NULL;
+    Icon* icon = nullptr;
 
-    int select = -1;
-    Texture* arenaSelect = NULL;
-    Texture* musicSelect = NULL;
+    Texture* arenaSelect = nullptr;
+    Texture* musicSelect = nullptr;
 
-    Mix_Music* music = NULL;
-    Mix_Chunk* chunk = NULL;
+    Mix_Music* music = nullptr;
+    Mix_Chunk* chunk = nullptr;
 
-    TTF_Font* font = NULL;
+    TTF_Font* font = nullptr;
     
     SDL_Event event;
-
     KeyStatus keyStatus;
 };
 
 // FUNCTION
+// Icon
 void setIcons(Icon* array);
-
-void initSelector(Selector& selector);
-void deInitSelector(Selector& selector);
 void destroyIcons(Icon* array);
 
-void updateSelector(Selector& selector);
-
-void drawIcon(Icon& icon);
 void drawIcons(Icon* array);
+void drawIcon(Icon& icon);
+
+// Selector
+void initSelector(Selector& selector);
+void deInitSelector(Selector& selector);
+
+void updateSelector(Selector& selector);
 
 void drawSelector(const Selector selector);
 

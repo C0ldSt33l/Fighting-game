@@ -44,9 +44,8 @@ struct Battle {
     SDL_Event event;
     BattleKey key;
 
-    Texture* arena = NULL;
-
-    Mix_Music* music = NULL;
+    Texture*   arena = nullptr;
+    Mix_Music* music = nullptr;
 
     Player *player1 = nullptr,
            *player2 = nullptr;

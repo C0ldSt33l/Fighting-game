@@ -21,3 +21,8 @@ TTF_Font* loadFont(const char* file, int size) {
 
     return font;
 }
+
+void centerText(int& coord, int& size, int maxSize) {
+
+    coord = (maxSize - size) / 2;
+}

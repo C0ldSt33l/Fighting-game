@@ -6,11 +6,13 @@
 #include"battle.h"
 
 
-const char character[PLAYER_COUNT][12] = {
+const char character[CHARACTER_COUNT][12] = {
     "hakuman",
-    "kagura"
+    "hazama",
+    "kagura",
     "naoto",
     "tager",
+    "terumi"
 };
 
 
@@ -43,7 +45,7 @@ Player* initPlayer(const char* name, int side) {
     player->action = initAction(name, file);
     fclose(file);
     
-    int i = ANIMATION_JUMP_BLOCK;
+    int i = ANIMATION_NEUTRAL;
     player->curanimation = i;
     player->curframe = 0;
     player->isPlaying = true;
@@ -98,7 +100,7 @@ void deInitPlayer(Player& player) {
     player.time = -1;
 }
 
-void setJump(PlayerKey& key, int& angle, const SDL_Rect& dstrect) {
+void setJumpAngle(PlayerKey& key, int& angle, const SDL_Rect& dstrect) {
     
     if (dstrect.y == BOARD.h - dstrect.h) {
         angle = 90;
@@ -237,7 +239,7 @@ void jump(SDL_Rect& dstrect, int& angle, int move, int speedx, int speedy, Playe
 
     if (move != PLAYER_JUMPING) return;
 
-    setJump(key, angle, dstrect);
+    setJumpAngle(key, angle, dstrect);
 
     static float offsetx, offsety;
     offsetx = speedx * cos(angle * M_PI / 180) * side;
@@ -309,9 +311,9 @@ void movePlayers(Player& player1, Player& player2) {
     static SDL_Rect intersection;
     SDL_IntersectRect(&player1.dstrect, &player2.dstrect, &intersection);
     if (intersection.w >= INTERSECTION_MAX_WIDTH) {
-        if (player1.key.forward || player1.status.move == PLAYER_JUMPING)
+        if (player1.status.move == PLAYER_WALKING_FORWARD || player1.status.move == PLAYER_JUMPING)
             speedX1 = 0;
-        if (player2.key.forward || player2.status.move == PLAYER_JUMPING)
+        if (player2.status.move == PLAYER_WALKING_FORWARD || player2.status.move == PLAYER_JUMPING)
             speedX2 = 0;
     }
 

@@ -105,4 +105,15 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="files\data\naoto.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="files\data\tager.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="hazama.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+  </ItemGroup>
 </Project>

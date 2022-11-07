@@ -15,7 +15,7 @@
 
 #define INTERSECTION_MAX_WIDTH 100
 
-#define PLAYER_COUNT 4
+#define CHARACTER_COUNT 6
 
 #define CHARACTER_ANIMATION_PATH "files/assets/sprites/characters/"
 #define CHARACTER_DATA_PATH      "files/data/"
@@ -49,7 +49,7 @@ enum AttackDirection {
     ATTACK_HIGH,
 };
 
-extern const char character[PLAYER_COUNT][12];
+extern const char character[CHARACTER_COUNT][12];
 
 
 // STRUCTS
@@ -76,7 +76,6 @@ struct Status {
 };
 
 struct Player {
-
     Action* action;
     
     int  curframe     = -1;
@@ -120,7 +119,7 @@ void decreasePlayerHP(int& health, int damage);
 
 void walk(SDL_Rect& dstrect, PlayerKey& key, const Status& status, int speedx, int side);
 
-void setJump(PlayerKey& key, int& angle, const SDL_Rect& dstrect);
+void setJumpAngle(PlayerKey& key, int& angle, const SDL_Rect& dstrect);
 void jump(SDL_Rect& dstrect, int& angle, int move, int speedx, int speedy, PlayerKey& key, int side);
 
 void updatePlayers(Player& player1, Player& player2, BattleKey& key);
